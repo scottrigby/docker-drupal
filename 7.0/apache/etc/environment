@@ -1,0 +1,4 @@
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/var/www/html/vendor/bin:/usr/local/share/hub-linux-amd64-2.2.3/bin"
+COMPOSER_HOME="/etc/composer"
+COMPOSER_DISABLE_XDEBUG_WARN="1"
+COMPOSER_ALLOW_SUPERUSER="1"
