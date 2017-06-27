@@ -5,6 +5,12 @@ imagePullPolicy: Always
 ## To-do: Keep an eye on this PR in stable/drupal:
 ## ref: https://github.com/kubernetes/charts/pull/1232
 volumeMounts:
+  # To-do: We need to refactor our Dockerfile to copy Drupal into the pod at
+  #   runtime rather than COPY at build, because otherwise everything in the
+  #   docroot gets overwritten as an empty dir.
+  #   ref: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
+  # drupal:
+  #   mountPath: /var/www/html/docroot
   apache:
     mountPath: ""
 
