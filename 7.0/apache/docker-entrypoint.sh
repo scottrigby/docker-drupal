@@ -2,7 +2,6 @@
 
 if [ -f initialized.txt ]; then
   echo 'Drupal is already initialized.'
-  exit 0
 else
   touch initialized.txt
 
