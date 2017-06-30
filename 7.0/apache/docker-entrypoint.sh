@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-if [ -f docroot/initialized.txt ]; then
+if [ -f initialized.txt ]; then
   echo 'Drupal is already initialized.'
   exit 0
 else
-  touch docroot/initialized.txt
+  touch initialized.txt
 
   # Install Drush using Composer.
   composer global require drush/drush:"$DRUSH_VERSION" --prefer-dist
@@ -13,11 +13,11 @@ else
   # Before running this, from the project root, run:
   # `drush dl drupal-7.56 --drupal-project-rename=docroot`
   #drush dl drupal-$DRUPAL_VERSION --drupal-project-rename=docroot -y
-  cd docroot
+  pushd docroot
   drush dl drupal-$DRUPAL_VERSION
-  mv drupal-$DRUPAL_VERSION/* drupal-$DRUPAL_VERSION/.htaccess ..
+  mv drupal-$DRUPAL_VERSION/* drupal-$DRUPAL_VERSION/.htaccess .
   rm -r drupal-$DRUPAL_VERSION
-  cd ..
+  popd
 
   # If a settings file doesn't exist, assume Drupal should be initialized for
   # installation.
@@ -28,4 +28,4 @@ else
   chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP /var/www/html
 fi
 
-php-fpm -F
+/usr/bin/supervisord
