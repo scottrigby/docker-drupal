@@ -77,9 +77,9 @@ git clone git@github.com:scottrigby/docker-drupal.git
 export IMAGE=cms-php7:local
 time docker build -t $IMAGE -f 7.0/apache/Dockerfile 7.0/apache
 
-# Wait a moment for tiller pod to be ready, then:
 # Optional: adjust helm-values.yaml` to taste (including local mount options).
-helm install ./helm-drupal/ -f helm-values.yaml --name local
+# Wait a moment for tiller pod to be ready, then see "Deploy to k8s" section
+# above.
 
 # Wait a moment for drupal and mariadb containers to be ready, then:
 open $(minikube service local-drupal --url | sed -n 1p)
