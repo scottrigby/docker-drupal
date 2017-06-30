@@ -60,44 +60,27 @@ RUN curl --silent --output /tmp/composer-setup.php https://getcomposer.org/insta
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     rm /tmp/composer-setup.php
 
-# Install Hub.
-RUN curl -L https://github.com/github/hub/releases/download/v2.2.3/hub-linux-amd64-2.2.3.tgz | tar xz -C /usr/local/share
-
 # Set the Drush version.
 ENV DRUSH_VERSION 8.1.12
-
-# Install Drush using Composer.
-RUN composer global require drush/drush:"$DRUSH_VERSION" --prefer-dist  && \
-    ln -s /root/.composer/vendor/bin/drush /usr/local/bin/drush
+ENV DRUPAL_VERSION 7.56
 
 # Set the default working directory.
 WORKDIR /var/www/html
 
-# Before running this, from the project root, run:
-# `drush dl drupal-7.56 --drupal-project-rename=docroot`
-COPY docroot /var/www/html/docroot
+COPY docker-entrypoint.sh /
 
-# If a settings file doesn't exist, assume Drupal should be initialized for
-# installation.
-# ref: http://cgit.drupalcode.org/drupal/tree/INSTALL.txt?h=7.x
-# To-do: move this optional step to a CMD docker-entrypoint script, based on
-# env variables.
 ARG SITE
 ENV SITE ${SITE:-docroot/sites/default}
-RUN if [ ! -f $SITE/settings.php ]; then cp $SITE/default.settings.php $SITE/settings.php; chmod a+w $SITE/settings.php; fi && \
-    if [ ! -d $SITE/files ]; then mkdir $SITE/files; chmod a+w $SITE/files; fi && \
-    ls -la $SITE
 
 # Set defaults for Apache and PHP.
 ENV APACHE_RUN_USER=www-data APACHE_RUN_GROUP=www-data
-RUN chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP /var/www/html
 
 # Expose a volume to tooling that looks for it.
 # But don't declare VOLUME unless you are done with that directory.
 # ref: https://github.com/moby/moby/issues/3639
-VOLUME /var/www/html
+VOLUME /var/www/html/docroot
 
 # Expose Apache to the outside world.
 EXPOSE 80
 
-ENTRYPOINT ["/usr/bin/supervisord"]
+CMD ["/docker-entrypoint.sh"]

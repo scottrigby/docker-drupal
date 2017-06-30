@@ -1,18 +1,14 @@
 ## Current image location. Pull always from "master" until we have a release.
-image: quay.io/scottrigby/php7-apache-drupal:master
+image: quay.io/scottrigby/php7-apache-drupal:build-to-run
 imagePullPolicy: Always
 
 ## To-do: Keep an eye on this PR in stable/drupal:
 ## ref: https://github.com/kubernetes/charts/pull/1232
 volumeMounts:
-  # To-do: We need to refactor our Dockerfile to copy Drupal into the pod at
-  #   runtime rather than COPY at build, because otherwise everything in the
-  #   docroot gets overwritten as an empty dir.
-  #   ref: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
-  # drupal:
-  #   mountPath: /var/www/html/docroot
+  drupal:
+    mountPath: /var/www/html/docroot
   apache:
-    mountPath: ""
+    mountPath: false
 
 ## This is your host machine's full path to the Drupal docroot to mount.
 ## See the Dockerfile note about downloading Drupal with drush in-place for an
@@ -29,7 +25,7 @@ livenessProbe:
   httpGet:
     path: /
     port: http
-  initialDelaySeconds: 30
+  initialDelaySeconds: 60
 readinessProbe:
   httpGet:
     path: /
