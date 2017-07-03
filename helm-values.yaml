@@ -1,5 +1,5 @@
 ## Current image location. Pull always from "master" until we have a release.
-image: gcr.io/silken-dogfish-170920/github-scottrigby-docker-drupal
+image: quay.io/scottrigby/php7-apache-drupal:master
 imagePullPolicy: Always
 
 ## To-do: Keep an eye on this PR in stable/drupal:
