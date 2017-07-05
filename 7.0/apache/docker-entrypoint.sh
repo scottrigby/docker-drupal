@@ -9,13 +9,24 @@ else
   composer global require drush/drush:"$DRUSH_VERSION" --prefer-dist
   ln -s /root/.composer/vendor/bin/drush /usr/local/bin/drush
 
-  # Before running this, from the project root, run:
-  # `drush dl drupal-7.56 --drupal-project-rename=docroot`
-  #drush dl drupal-$DRUPAL_VERSION --drupal-project-rename=docroot -y
+  # Install Drupal codebase into docroot.
   pushd docroot
-  drush dl drupal-$DRUPAL_VERSION
-  mv drupal-$DRUPAL_VERSION/* drupal-$DRUPAL_VERSION/.htaccess .
-  rm -r drupal-$DRUPAL_VERSION
+
+  # Determine how to install Drupal codebase from ENVs.
+  if [ ! -z "$GIT_CLONE_URL" ]; then
+    # Git download method.
+    git clone $GIT_CLONE_URL tmp
+  else
+    # Drush method.
+    drush dl drupal-$DRUPAL_VERSION --drupal-project-rename=tmp
+  fi
+
+  # Be permissive about copying dotfiles, because we won't know what important
+  # ones are in the custom git repo, or may be added to Drupal core in the
+  # future. It will only give a warning that you can not copy the directory
+  # itself (alias "." and "..").
+  mv tmp/$GIT_DOCROOT/{.,}* .
+  rm -r tmp
   popd
 
   # If a settings file doesn't exist, assume Drupal should be initialized for
