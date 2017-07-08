@@ -1,6 +1,9 @@
 # Don't change this unless you're prepared to fix breakage.
 FROM ubuntu:xenial
 
+ENV GOTPL_VER 0.1.5
+ENV GOTPL_URL https://github.com/wodby/gotpl/releases/download/${GOTPL_VER}/gotpl-linux-amd64-${GOTPL_VER}.tar.gz
+
 # Among other things, ensure that UTF characters in a PPA name don't break things.
 RUN apt-get clean && apt-get update && \
     apt-get install locales && \
@@ -60,6 +63,9 @@ RUN curl --silent --output /tmp/composer-setup.php https://getcomposer.org/insta
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     rm /tmp/composer-setup.php
 
+# Install Gotpl.
+RUN wget -qO- ${GOTPL_URL} | tar xz -C /usr/local/bin
+
 # Set the default working directory.
 WORKDIR /var/www/html
 
@@ -84,6 +90,18 @@ ENV SITE ${SITE:-docroot/sites/default}
 
 # Set defaults for Apache and PHP.
 ENV APACHE_RUN_USER=www-data APACHE_RUN_GROUP=www-data
+
+# Location for templatized Drupal DB connection settings file. This is an env
+# because the location is often project-specific (think Acquia site group). Be
+# sure to include the file name in the path string (the file name itself often
+# matters). To bypass settings file creation, do not set DRUPAL_SETTINGS_PATH.
+ENV DRUPAL_SETTINGS_PATH ${DRUPAL_SETTINGS_PATH:-}
+ENV MARIADB_HOST ${MARIADB_HOST:-}
+ENV MARIADB_DATABASE ${MARIADB_DATABASE:-}
+ENV MARIADB_USER ${MARIADB_USER:-}
+ENV MARIADB_PASSWORD ${MARIADB_PASSWORD:-}
+
+COPY templates /etc/gotpl/
 
 # Expose a volume to tooling that looks for it.
 # But don't declare VOLUME unless you are done with that directory.

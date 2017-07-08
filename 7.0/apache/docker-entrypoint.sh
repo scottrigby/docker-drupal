@@ -30,6 +30,10 @@ else
   rm -r tmp
   popd
 
+  if [ ! -z "$DRUPAL_SETTINGS_PATH" ]; then
+    gotpl /etc/gotpl/settings.php.tpl > $DRUPAL_SETTINGS_PATH
+  fi
+
   # If a settings file doesn't exist, assume Drupal should be initialized for
   # installation.
   # ref: http://cgit.drupalcode.org/drupal/tree/INSTALL.txt?h=7.x
