@@ -31,6 +31,8 @@ else
   popd
 
   if [ ! -z "$DRUPAL_SETTINGS_PATH" ]; then
+    DRUPAL_SETTINGS_DIR=$(dirname $DRUPAL_SETTINGS_PATH)
+    mkdir -p $DRUPAL_SETTINGS_DIR
     gotpl /etc/gotpl/settings.php.tpl > $DRUPAL_SETTINGS_PATH
   fi
 
