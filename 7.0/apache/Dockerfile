@@ -60,16 +60,26 @@ RUN curl --silent --output /tmp/composer-setup.php https://getcomposer.org/insta
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     rm /tmp/composer-setup.php
 
-# Set the Drush version.
-ENV DRUSH_VERSION 8.1.12
-ENV DRUPAL_VERSION 7.56
-
 # Set the default working directory.
 WORKDIR /var/www/html
 
 COPY docker-entrypoint.sh /
 
-ARG SITE
+ENV DRUSH_VERSION ${DRUSH_VERSION:-8.1.12}
+ENV DRUSH_DRUPAL_VERSION ${DRUPAL_VERSION:-7.56}
+
+# Download Drupal via Git instead of default Drush method. This env var is the
+# Custom Drupal codebase Git repo clone URL. Example:
+# "https://git.drupal.org/project/drupal.git".
+ENV GIT_CLONE_URL ${GIT_CLONE_URL:-}
+# Subdirectory within the git repo that should be moved to the Drupal docroot.
+# Example: "path/to/docroot". Leave blank if the docroot is the git root.
+ENV GIT_DOCROOT ${GIT_DOCROOT:-}
+# Optionally specify a git branch or tag to clone.
+ENV GIT_REF ${GIT_REF:-}
+
+# Drupal site directory, in case of Drupal multisite codebase.
+# ref: https://www.drupal.org/docs/7/multisite-drupal/multi-site-sharing-the-same-code-base
 ENV SITE ${SITE:-docroot/sites/default}
 
 # Set defaults for Apache and PHP.
