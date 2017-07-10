@@ -15,7 +15,7 @@ else
   # Determine how to install Drupal codebase from ENVs.
   if [ ! -z "$GIT_CLONE_URL" ]; then
     # Git download method.
-    [ ! -z "$GIT_REF"]] && REF_COMMAND="--branch $GIT_REF" || REF_COMMAND=''
+    [ ! -z "$GIT_REF" ] && REF_COMMAND="--branch $GIT_REF" || REF_COMMAND=''
     git clone $GIT_CLONE_URL $REF_COMMAND --depth=1 tmp
   else
     # Drush method.
