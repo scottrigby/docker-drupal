@@ -15,7 +15,7 @@ else
   # Determine how to install Drupal codebase from ENVs.
   if [ ! -z "$GIT_CLONE_URL" ]; then
     # Git download method.
-    [ ! -z "$GIT_REF"]] && REF_COMMAND="--branch $GIT_REF" || REF_COMMAND=''
+    [ ! -z "$GIT_REF" ] && REF_COMMAND="--branch $GIT_REF" || REF_COMMAND=''
     git clone $GIT_CLONE_URL $REF_COMMAND --depth=1 tmp
   else
     # Drush method.
@@ -29,6 +29,12 @@ else
   mv tmp/$GIT_DOCROOT/{.,}* .
   rm -r tmp
   popd
+
+  if [ ! -z "$DRUPAL_SETTINGS_PATH" ]; then
+    DRUPAL_SETTINGS_DIR=$(dirname $DRUPAL_SETTINGS_PATH)
+    mkdir -p $DRUPAL_SETTINGS_DIR
+    gotpl /etc/gotpl/settings.php.tpl > $DRUPAL_SETTINGS_PATH
+  fi
 
   # If a settings file doesn't exist, assume Drupal should be initialized for
   # installation.
