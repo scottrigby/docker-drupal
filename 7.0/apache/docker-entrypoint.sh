@@ -51,8 +51,7 @@ if [ ! -z "$BUILD_DEV" ]; then
   apt-get update && apt-get install -y \
     make \
     vim \
-    php-xdebug \
-    wget && \
+    php-xdebug && \
   apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* /var/tmp/*
 fi
 
