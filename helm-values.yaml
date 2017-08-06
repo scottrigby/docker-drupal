@@ -10,40 +10,92 @@ volumeMounts:
   apache:
     mountPath: false
 
-## This is your host machine's full path to the Drupal docroot to mount.
-## See the Dockerfile note about downloading Drupal with drush in-place for an
-## out-of-the-box vanilla Drupal site.
-# persistence:
-#   drupal:
-#     hostPath: /FULL/PATH/TO/EXISTING/HOST/DRUPAL/DOCROOT
-
-## Override the user/login probes. Since we don't auto-install Drupal, that path
-## would always fail.
-## To-do: Keep an eye on this PR in stable/drupal:
-## ref: https://github.com/kubernetes/charts/pull/1375
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-  initialDelaySeconds: 60
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
-  initialDelaySeconds: 30
-
-## Uncomment these to manually set a username and password.
-## Default: "user" username, and a randomly generated pass you can get by
-## inspecting the "drupal-password" K8S Secret.
-# drupalUsername: admin
-# drupalPassword: my-secure-password
+extraVars:
+## For drush-style Drupal core downloads.
+# - name: DRUSH_DRUPAL_VERSION
+#   value: 8.3.6
+## For git-style Drupal core downloads.
+# - name: GIT_CLONE_URL
+#   value: https://PERSONAL_ACCESS_TOKEN@github.com/YOUR_ORG/YOUR_REPO.git
+## Example from Acquia-style migrations.
+# - name: GIT_DOCROOT
+#   value: docroot
+# - name: DRUPAL_SETTINGS_PATH
+#   value: /var/www/site-php/AH_SITE_GROUP/AH_SITE_NAME-settings.inc
+## Your Git repo ref (tag or branch).
+# - name: GIT_REF
+#   value: v1.0.0
+## It would be nice if we could easily get these from mariadb YAML below.
+## @todo: consider defining mariadb YAML above this, then drawing from that
+##   with a YAML pointer.
+##
+- name: MARIADB_DATABASE
+  value: drupal
+- name: MARIADB_USER
+  value: drupal
+- name: MARIADB_PASSWORD
+  value: OBFUSCATED
 
 ## Since we're not using the bitnami-docker-drupal image, we want to create the
 ## mariadb database, user, and credentials. We can do that by passing these
 ## values to the dependent mariadb chart.
 ## ref: https://github.com/kubernetes/charts/blob/master/stable/mariadb/README.md
 ## ref: https://github.com/kubernetes/helm/blob/master/docs/chart_template_guide/subcharts_and_globals.md#overriding-values-from-a-parent-chart
+##
 mariadb:
   mariadbDatabase: drupal
   mariadbUser: drupal
-  mariadbPassword: drupal
+  mariadbPassword: OBFUSCATED
+  ## Temporary for testing on minikube without leaving orphaned pods.
+  # persistence:
+  #   enabled: false
+
+## Temporary for testing on minikube without leaving orphaned pods.
+## The mariadb persistence values must all be in one array, so they are defined
+## further below.
+##
+# persistence:
+#   enabled: false
+#   drupal:
+      ## This is your host machine's full path to the Drupal docroot to mount.
+      ## See the Dockerfile note about downloading Drupal with drush in-place for an
+      ## out-of-the-box vanilla Drupal site.
+      # hostPath: /FULL/PATH/TO/EXISTING/HOST/DRUPAL/DOCROOT
+
+## Override the user/login probes. Since we don't auto-install Drupal, that path
+## would always fail.
+## To-do: Keep an eye on this PR in stable/drupal:
+## ref: https://github.com/kubernetes/charts/pull/1375
+##
+## We can not currently specify more than 1 handler type for livenessProbe.
+## Note I fixed this upstream in kubernetes/helm, by allowing us to unset a key
+## within Helm's multiple values deep merge. This will be part of the next Helm
+## release 2.6.0, scheduled for July 31, 2017. Once that is released, set
+## "httpGet" to "null".
+## ref: https://github.com/kubernetes/helm/pull/2648
+## ref: https://github.com/kubernetes/helm/milestone/42
+##
+livenessProbe:
+  # To-do: Make PR in Helm's value nesting logic.
+  # If nil value, delete key during helm's deep nesting.
+  # httpGet: null
+  exec:
+    command:
+    - cat
+    - docroot/CHANGELOG.txt
+  initialDelaySeconds: 240
+## We set this to just check that PHP is properly installed. Note we can not
+## check the code on readiness (as we do for livenessProbe), because we install
+## the Drupal code at runtime, and our entrypoint script would have no chance to
+## do that if the pod is not considered ready to run. Also, we can not check
+## httpGet because if the Drupal database is not fully installed, Drupal will
+## issue a 302 redirect to install.php, but after it is installed, Drupal issues
+## a 200 - and I don't believe we can check for either 302 or 200 with httpGet
+## handler.
+##
+readinessProbe:
+  exec:
+    command:
+    - php
+    - --version
+  initialDelaySeconds: 30
