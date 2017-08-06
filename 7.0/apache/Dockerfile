@@ -67,7 +67,7 @@ WORKDIR /var/www/html
 COPY docker-entrypoint.sh /
 
 ENV DRUSH_VERSION ${DRUSH_VERSION:-8.1.12}
-ENV DRUSH_DRUPAL_VERSION ${DRUPAL_VERSION:-7.56}
+ENV DRUSH_DRUPAL_VERSION ${DRUSH_DRUPAL_VERSION:-7.56}
 
 # Download Drupal via Git instead of default Drush method. This env var is the
 # Custom Drupal codebase Git repo clone URL. Example:

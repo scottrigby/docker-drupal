@@ -21,7 +21,7 @@ else
     git clone $GIT_CLONE_URL $REF_COMMAND --depth=1 tmp
   else
     # Drush method.
-    drush dl drupal-$DRUPAL_VERSION --drupal-project-rename=tmp
+    drush dl drupal-$DRUSH_DRUPAL_VERSION --drupal-project-rename=tmp
   fi
 
   # Be permissive about copying dotfiles, because we won't know what important
