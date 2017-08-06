@@ -15,6 +15,8 @@ else
   # Determine how to install Drupal codebase from ENVs.
   if [ ! -z "$GIT_CLONE_URL" ]; then
     # Git download method.
+    apt-get update && apt-get install -y git
+
     [ ! -z "$GIT_REF" ] && REF_COMMAND="--branch $GIT_REF" || REF_COMMAND=''
     git clone $GIT_CLONE_URL $REF_COMMAND --depth=1 tmp
   else
@@ -43,6 +45,14 @@ else
   if [ ! -d $SITE/files ]; then mkdir $SITE/files; chmod a+w $SITE/files; fi
 
   chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP /var/www/html
+fi
+
+if [ ! -z "$BUILD_DEV" ]; then
+  apt-get update && apt-get install -y \
+    make \
+    vim \
+    php-xdebug && \
+  apt-get clean && rm -rf /tmp/* /var/lib/apt/lists/* /var/tmp/*
 fi
 
 /usr/bin/supervisord
